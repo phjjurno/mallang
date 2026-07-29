@@ -1,0 +1,114 @@
+/* 말랑말랑 — 본문 페이지(약관·방침·문의) 공용 스타일 */
+:root{
+  --bg:#FFF7F2; --bg-glow:#FFE9E0; --surface:#FFFFFF; --surface-2:#FFF1EA;
+  --ink:#5C4742; --ink-soft:#9A8078; --accent:#FF9EB5; --accent-deep:#F2708F;
+  --accent-soft:#FFE3EA; --mint:#9FDCC8; --mint-soft:#E3F6EF; --line:#F3E2DA;
+  --shadow:0 10px 30px rgba(242,112,143,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#2A2233; --bg-glow:#372B45; --surface:#352C40; --surface-2:#3E3350;
+    --ink:#F5EAEF; --ink-soft:#B9A8B8; --accent:#FF9EB5; --accent-deep:#FF7FA0;
+    --accent-soft:#4A3348; --mint:#8ED4BC; --mint-soft:#2F4340; --line:#463A55;
+    --shadow:0 12px 34px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2A2233; --bg-glow:#372B45; --surface:#352C40; --surface-2:#3E3350;
+  --ink:#F5EAEF; --ink-soft:#B9A8B8; --accent:#FF9EB5; --accent-deep:#FF7FA0;
+  --accent-soft:#4A3348; --mint:#8ED4BC; --mint-soft:#2F4340; --line:#463A55;
+  --shadow:0 12px 34px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#FFF7F2; --bg-glow:#FFE9E0; --surface:#FFFFFF; --surface-2:#FFF1EA;
+  --ink:#5C4742; --ink-soft:#9A8078; --accent:#FF9EB5; --accent-deep:#F2708F;
+  --accent-soft:#FFE3EA; --mint:#9FDCC8; --mint-soft:#E3F6EF; --line:#F3E2DA;
+  --shadow:0 10px 30px rgba(242,112,143,.10);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  line-height:1.75; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:inherit}
+a:hover{color:var(--accent-deep)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:12px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+
+/* ── header ── */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px)}
+.nav{display:flex;align-items:center;gap:28px;padding:16px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.01em;text-decoration:none}
+.logo-blob{width:26px;height:26px;background:var(--accent);border-radius:46% 54% 55% 45%/52% 44% 56% 48%;position:relative;flex:none}
+.logo-blob::before,.logo-blob::after{content:"";position:absolute;top:10px;width:3px;height:5px;border-radius:3px;background:#5C4742}
+.logo-blob::before{left:7px}.logo-blob::after{right:7px}
+nav.menu{display:flex;gap:22px;margin-left:auto;font-size:14.5px;font-weight:600;color:var(--ink-soft)}
+nav.menu a{text-decoration:none}
+nav.menu a:hover{color:var(--accent-deep)}
+@media(max-width:560px){nav.menu{gap:14px;font-size:13px}}
+
+/* ── 본문 ── */
+.doc{max-width:760px;margin:0 auto;padding:48px 24px 72px}
+.eyebrow{
+  display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.14em;
+  color:var(--accent-deep);background:var(--accent-soft);
+  padding:7px 14px;border-radius:999px;margin-bottom:18px;
+}
+.doc h1{font-size:clamp(28px,4.5vw,40px);font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:0 0 10px;text-wrap:balance}
+.doc .updated{color:var(--ink-soft);font-size:14px;margin:0 0 40px}
+.doc h2{
+  font-size:19px;font-weight:800;margin:40px 0 12px;padding-top:24px;
+  border-top:1.5px solid var(--line);text-wrap:balance;
+}
+.doc h2:first-of-type{border-top:none;padding-top:0}
+.doc h3{font-size:16px;font-weight:800;margin:24px 0 8px}
+.doc p{margin:0 0 14px}
+.doc ul{margin:0 0 16px;padding-left:20px}
+.doc li{margin-bottom:8px}
+.doc strong{font-weight:800;color:var(--accent-deep)}
+
+.callout{
+  background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
+  padding:22px 24px;margin:0 0 32px;box-shadow:var(--shadow);
+}
+.callout p:last-child{margin-bottom:0}
+
+table.tbl{width:100%;border-collapse:collapse;margin:0 0 18px;font-size:14.5px}
+table.tbl th,table.tbl td{border:1.5px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+table.tbl th{background:var(--surface-2);font-weight:800}
+.scroll-x{overflow-x:auto}
+
+/* ── 문의 카드 ── */
+.contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:0 0 32px}
+@media(max-width:640px){.contact-grid{grid-template-columns:1fr}}
+.contact-card{
+  background:var(--surface);border:1.5px solid var(--line);border-radius:24px;
+  padding:26px 24px;box-shadow:var(--shadow);
+}
+.contact-card .icon{
+  width:48px;height:48px;display:grid;place-items:center;margin-bottom:14px;
+  border-radius:42% 58% 52% 48%/55% 45% 55% 45%;background:var(--accent-soft);font-size:22px;
+}
+.contact-card h3{margin:0 0 6px;font-size:17px;font-weight:800}
+.contact-card p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+.contact-card a.big{
+  display:inline-block;margin-top:10px;font-size:16px;font-weight:800;
+  color:var(--accent-deep);text-decoration:none;word-break:break-all;
+}
+.contact-card a.big:hover{text-decoration:underline}
+
+/* ── footer (전 페이지 공용) ── */
+footer{border-top:1.5px solid var(--line);padding:44px 0 52px;color:var(--ink-soft);font-size:13.5px}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;margin-bottom:32px}
+@media(max-width:720px){.foot-grid{grid-template-columns:1fr;gap:26px}}
+.foot-grid h4{font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--ink);margin:0 0 12px}
+.foot-grid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.foot-grid a{text-decoration:none}
+.foot-grid a:hover{color:var(--accent-deep)}
+.foot-brand .logo{margin-bottom:10px;font-size:17px}
+.foot-brand p{margin:0;max-width:30em}
+.foot-bottom{border-top:1.5px solid var(--line);padding-top:22px;text-align:center}
+.ext::after{content:"↗";font-size:11px;margin-left:3px;opacity:.6}
