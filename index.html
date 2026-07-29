@@ -1,0 +1,866 @@
+<meta charset="utf-8">
+<title>말랑말랑 — 온라인 말랑이</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#FFF7F2;
+    --bg-glow:#FFE9E0;
+    --surface:#FFFFFF;
+    --surface-2:#FFF1EA;
+    --ink:#5C4742;
+    --ink-soft:#9A8078;
+    --accent:#FF9EB5;
+    --accent-deep:#F2708F;
+    --accent-soft:#FFE3EA;
+    --mint:#9FDCC8;
+    --mint-soft:#E3F6EF;
+    --line:#F3E2DA;
+    --shadow:0 10px 30px rgba(242,112,143,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#2A2233;
+      --bg-glow:#372B45;
+      --surface:#352C40;
+      --surface-2:#3E3350;
+      --ink:#F5EAEF;
+      --ink-soft:#B9A8B8;
+      --accent:#FF9EB5;
+      --accent-deep:#FF7FA0;
+      --accent-soft:#4A3348;
+      --mint:#8ED4BC;
+      --mint-soft:#2F4340;
+      --line:#463A55;
+      --shadow:0 12px 34px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#2A2233; --bg-glow:#372B45; --surface:#352C40; --surface-2:#3E3350;
+    --ink:#F5EAEF; --ink-soft:#B9A8B8; --accent:#FF9EB5; --accent-deep:#FF7FA0;
+    --accent-soft:#4A3348; --mint:#8ED4BC; --mint-soft:#2F4340; --line:#463A55;
+    --shadow:0 12px 34px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --bg:#FFF7F2; --bg-glow:#FFE9E0; --surface:#FFFFFF; --surface-2:#FFF1EA;
+    --ink:#5C4742; --ink-soft:#9A8078; --accent:#FF9EB5; --accent-deep:#F2708F;
+    --accent-soft:#FFE3EA; --mint:#9FDCC8; --mint-soft:#E3F6EF; --line:#F3E2DA;
+    --shadow:0 10px 30px rgba(242,112,143,.10);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:12px}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+
+  /* ── header ── */
+  header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px)}
+  .nav{display:flex;align-items:center;gap:28px;padding:16px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.01em}
+  .logo-blob{width:26px;height:26px;background:var(--accent);border-radius:46% 54% 55% 45%/52% 44% 56% 48%;position:relative;flex:none}
+  .logo-blob::before,.logo-blob::after{content:"";position:absolute;top:10px;width:3px;height:5px;border-radius:3px;background:#5C4742}
+  .logo-blob::before{left:7px}.logo-blob::after{right:7px}
+  nav.menu{display:flex;gap:22px;margin-left:auto;font-size:14.5px;font-weight:600;color:var(--ink-soft)}
+  nav.menu a:hover{color:var(--accent-deep)}
+  @media(max-width:560px){nav.menu{display:none}}
+
+  /* ── hero ── */
+  .hero{position:relative;padding:44px 0 24px;text-align:center}
+  .hero::before{
+    content:"";position:absolute;inset:-120px -40vw 0;z-index:-1;
+    background:radial-gradient(600px 420px at 50% 36%,var(--bg-glow),transparent 70%);
+  }
+  .eyebrow{
+    display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.14em;
+    color:var(--accent-deep);background:var(--accent-soft);
+    padding:7px 14px;border-radius:999px;margin-bottom:18px;
+  }
+  h1{
+    font-size:clamp(34px,6vw,54px);font-weight:800;letter-spacing:-.02em;
+    line-height:1.2;margin:0 0 14px;text-wrap:balance;
+  }
+  h1 .pink{color:var(--accent-deep)}
+  .hero p.sub{max-width:32em;margin:0 auto;color:var(--ink-soft);font-size:16.5px;text-wrap:balance}
+
+  /* ── squishy stage ── */
+  .stage{position:relative;max-width:560px;margin:8px auto 0}
+  #squish{display:block;width:100%;height:auto;touch-action:none;cursor:grab;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  #squish.pressing{cursor:grabbing}
+  .sound-toggle{
+    position:absolute;top:2px;right:2px;z-index:2;
+    width:46px;height:46px;border-radius:50%;
+    border:1.5px solid var(--line);background:var(--surface);
+    font-size:20px;cursor:pointer;box-shadow:var(--shadow);
+    display:grid;place-items:center;transition:transform .15s,opacity .15s;
+  }
+  .sound-toggle:hover{transform:scale(1.08)}
+  .sound-toggle[aria-pressed="false"]{opacity:.5}
+  .hint{font-size:13.5px;color:var(--ink-soft);margin-top:-6px}
+  .hint b{color:var(--accent-deep);font-weight:700}
+
+  .counter{
+    display:inline-flex;align-items:baseline;gap:10px;margin-top:14px;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:18px;
+    padding:10px 20px;box-shadow:var(--shadow);
+  }
+  .counter .label{font-size:12.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-soft)}
+  .counter .num{font-size:26px;font-weight:800;color:var(--accent-deep);font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+  .counter .unit{font-size:14px;color:var(--ink-soft)}
+
+  /* flavor chips */
+  .flavors{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:26px 0 8px}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font:inherit;font-size:14px;font-weight:700;color:var(--ink);
+    background:var(--surface);border:1.5px solid var(--line);border-radius:999px;
+    padding:9px 16px;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;
+  }
+  .chip .dot{width:14px;height:14px;border-radius:50%;flex:none}
+  .chip:hover{transform:translateY(-2px)}
+  .chip[aria-pressed="true"]{border-color:var(--accent-deep);box-shadow:0 4px 14px rgba(242,112,143,.22)}
+  .flavor-note{margin:12px 0 0;font-size:14px;color:var(--ink-soft)}
+  .flavor-note b{color:var(--accent-deep);font-weight:800}
+
+  /* ── sections ── */
+  section{padding:64px 0}
+  .sec-head{text-align:center;margin-bottom:36px}
+  .sec-head .eyebrow{margin-bottom:12px}
+  h2{font-size:clamp(24px,3.6vw,32px);font-weight:800;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+  .sec-head p{color:var(--ink-soft);margin:0;font-size:15.5px}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .card{
+    background:var(--surface);border:1.5px solid var(--line);border-radius:26px;
+    padding:28px 26px;box-shadow:var(--shadow);
+  }
+  .card .icon{
+    width:52px;height:52px;display:grid;place-items:center;margin-bottom:16px;
+    border-radius:42% 58% 52% 48%/55% 45% 55% 45%;font-size:24px;
+  }
+  .card:nth-child(1) .icon{background:var(--accent-soft)}
+  .card:nth-child(2) .icon{background:var(--mint-soft)}
+  .card:nth-child(3) .icon{background:var(--surface-2)}
+  .card h3{margin:0 0 8px;font-size:18px;font-weight:800}
+  .card p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+
+  /* ── friends ── */
+  .friends{display:flex;flex-wrap:wrap;justify-content:center;gap:34px}
+  .friend{display:flex;flex-direction:column;align-items:center;gap:12px;width:120px}
+  .friend .body{
+    width:96px;height:88px;position:relative;
+    border-radius:47% 53% 52% 48%/58% 55% 45% 42%;
+    box-shadow:inset -6px -10px 0 rgba(0,0,0,.05);
+    transition:transform .2s;
+  }
+  .friend:hover .body{animation:jiggle .55s ease}
+  @keyframes jiggle{
+    0%{transform:scale(1,1)} 25%{transform:scale(1.12,.86)}
+    50%{transform:scale(.92,1.08)} 75%{transform:scale(1.05,.95)} 100%{transform:scale(1,1)}
+  }
+  .face{position:absolute;inset:0}
+  .face i{position:absolute;top:38%;width:6px;height:9px;border-radius:4px;background:#5C4742}
+  .face i.l{left:30%}.face i.r{right:30%}
+  .face .mouth{position:absolute;top:52%;left:50%;transform:translateX(-50%);width:12px;height:6px;border:2.5px solid #5C4742;border-top:none;border-radius:0 0 10px 10px}
+  .face .cheek{position:absolute;top:48%;width:12px;height:7px;border-radius:50%;background:rgba(255,120,150,.4)}
+  .face .cheek.l{left:16%}.face .cheek.r{right:16%}
+  .friend .name{font-size:14.5px;font-weight:800}
+  .friend .desc{font-size:12.5px;color:var(--ink-soft);margin-top:-8px;text-align:center}
+
+  /* ── footer ── */
+  footer{border-top:1.5px solid var(--line);padding:34px 0 48px;text-align:center;color:var(--ink-soft);font-size:13.5px}
+  footer .logo{justify-content:center;margin-bottom:10px}
+
+  @media (prefers-reduced-motion: reduce){
+    .friend:hover .body{animation:none}
+    .chip,.chip:hover{transition:none;transform:none}
+  }
+</style>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top"><span class="logo-blob"></span>말랑말랑</a>
+    <nav class="menu" aria-label="주요 메뉴">
+      <a href="#play">놀이터</a>
+      <a href="#why">왜 말랑이?</a>
+      <a href="#friends">친구들</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- hero + playground -->
+  <section class="hero" id="play" style="padding-top:44px">
+    <div class="wrap">
+      <span class="eyebrow">설치 없는 온라인 말랑이</span>
+      <h1>오늘도, <span class="pink">말랑하게</span>.</h1>
+      <p class="sub">손끝으로 꾹— 눌러보세요. 화면 속 말랑이가 진짜처럼 몰랑거리며 딱딱해진 하루를 풀어줘요.</p>
+
+      <div class="stage">
+        <button class="sound-toggle" id="soundBtn" aria-pressed="true" aria-label="소리 켜짐 / 끄기">🔊</button>
+        <canvas id="squish" width="560" height="470" aria-label="누르면 말랑거리는 말랑이. 마우스나 손가락으로 눌러보세요. 두 손가락으로 조물조물도 가능해요."></canvas>
+      </div>
+      <p class="hint">말랑이를 <b>꾹 누르면</b> 표정이 바뀌어요 · 모바일·태블릿에선 <b>두 손가락으로 쭉 늘리고 빙글 돌려</b> 보세요</p>
+
+      <div class="counter" role="status">
+        <span class="label">오늘의 말랑</span>
+        <span class="num" id="count">0</span>
+        <span class="unit">번</span>
+      </div>
+
+      <div class="flavors" role="group" aria-label="말랑이 맛 고르기">
+        <button class="chip" data-flavor="strawberry" aria-pressed="true"><span class="dot" style="background:#FFB3C7"></span>딸기우유</button>
+        <button class="chip" data-flavor="melon" aria-pressed="false"><span class="dot" style="background:#B8E6C8"></span>멜론소다</button>
+        <button class="chip" data-flavor="sky" aria-pressed="false"><span class="dot" style="background:#AEDCF0"></span>하늘소다</button>
+        <button class="chip" data-flavor="grape" aria-pressed="false"><span class="dot" style="background:#CDB8F0"></span>포도젤리</button>
+        <button class="chip" data-flavor="lemon" aria-pressed="false"><span class="dot" style="background:#FFE29E"></span>레몬푸딩</button>
+      </div>
+      <p class="flavor-note" id="flavorNote" role="status"></p>
+    </div>
+  </section>
+
+  <!-- why -->
+  <section id="why">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">왜 말랑이?</span>
+        <h2>주무르기만 해도 마음이 풀려요</h2>
+        <p>말랑말랑은 아무 조건 없이, 브라우저에서 바로 만나는 작은 휴식이에요.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="icon">🫧</div>
+          <h3>스트레스는 말랑하게</h3>
+          <p>마감, 시험, 월요일… 굳어버린 마음을 손끝으로 조물조물 풀어보세요. 말랑이는 언제나 다시 통통하게 돌아와요.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🌱</div>
+          <h3>설치 없이 바로</h3>
+          <p>앱 설치도, 회원가입도 없어요. 브라우저 탭 하나만 열면 언제 어디서든 말랑 타임이 시작돼요.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🎨</div>
+          <h3>취향대로 고르기</h3>
+          <p>딸기우유부터 레몬푸딩까지 다섯 가지 맛. 오늘의 기분에 어울리는 색을 골라 주물러 보세요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- friends -->
+  <section id="friends" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">말랑이 친구들</span>
+        <h2>곧 만나게 될 친구들</h2>
+        <p>마우스를 올리면 인사해요. 조금씩 놀이터에 놀러 올 예정이에요.</p>
+      </div>
+      <div class="friends">
+        <div class="friend">
+          <div class="body" style="background:#FFB3C7"><div class="face"><i class="l"></i><i class="r"></i><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></div></div>
+          <span class="name">몽글이</span>
+          <span class="desc">겁이 많지만 제일 말랑함</span>
+        </div>
+        <div class="friend">
+          <div class="body" style="background:#B8E6C8;border-radius:52% 48% 45% 55%/44% 58% 42% 56%"><div class="face"><i class="l"></i><i class="r"></i><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></div></div>
+          <span class="name">푸딩이</span>
+          <span class="desc">건드리면 3초간 떨림</span>
+        </div>
+        <div class="friend">
+          <div class="body" style="background:#AEDCF0;border-radius:44% 56% 58% 42%/56% 46% 54% 44%"><div class="face"><i class="l"></i><i class="r"></i><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></div></div>
+          <span class="name">쫀득이</span>
+          <span class="desc">한번 잡으면 놓기 힘듦</span>
+        </div>
+        <div class="friend">
+          <div class="body" style="background:#CDB8F0;border-radius:55% 45% 48% 52%/47% 55% 45% 53%"><div class="face"><i class="l"></i><i class="r"></i><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></div></div>
+          <span class="name">방울이</span>
+          <span class="desc">밤에 더 반짝거림</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="logo"><span class="logo-blob"></span>말랑말랑</div>
+    <p style="margin:0">세상이 조금 더 말랑해지길 바라며 만들었어요.<br>© 2026 말랑말랑 · 온라인 말랑이 놀이터</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  const canvas = document.getElementById("squish");
+  const ctx = canvas.getContext("2d");
+  const countEl = document.getElementById("count");
+  const soundBtn = document.getElementById("soundBtn");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* 맛마다 재질이 다르다 — 색뿐 아니라 물리 상수 전체가 달라진다.
+     k=탄성, coup=출렁임 전달, damp=감쇠(낮을수록 오래 떨림), indent=최대 함몰,
+     lag=자국이 손가락을 따라오는 점성, stretchMax·twistK 등=두 손가락 늘리기와 비틀기 */
+  const FLAVORS = {
+    strawberry:{
+      body:"#FFB3C7",top:"#FFCFDD",deep:"#F2708F",cheek:"rgba(242,112,143,.35)",
+      label:"딸기우유", note:"딱 알맞게 말랑해요",
+      k:0.205,coup:0.150,damp:0.760,indent:0.26,lag:0.26,
+      stretchMax:1.75,stretchK:0.22,stretchBack:0.100,stretchD:0.85,twistK:0.18,twistD:0.80,twistRelax:0.90,pitch:1.00
+    },
+    melon:{
+      body:"#B8E6C8",top:"#D4F2DF",deep:"#6FC492",cheek:"rgba(255,140,160,.30)",
+      label:"멜론소다", note:"탱탱— 오래 통통 튀어요",
+      k:0.230,coup:0.165,damp:0.890,indent:0.22,lag:0.45,
+      stretchMax:1.45,stretchK:0.30,stretchBack:0.200,stretchD:0.88,twistK:0.26,twistD:0.86,twistRelax:0.82,pitch:1.15
+    },
+    sky:{
+      body:"#AEDCF0",top:"#CFEBF8",deep:"#6FB3D8",cheek:"rgba(255,140,160,.30)",
+      label:"하늘소다", note:"물처럼 찰랑찰랑 흔들려요",
+      k:0.140,coup:0.195,damp:0.905,indent:0.30,lag:0.50,
+      stretchMax:1.90,stretchK:0.20,stretchBack:0.090,stretchD:0.90,twistK:0.14,twistD:0.88,twistRelax:0.88,pitch:1.08
+    },
+    grape:{
+      body:"#CDB8F0",top:"#E0D3F7",deep:"#9C7FD4",cheek:"rgba(255,140,160,.30)",
+      label:"포도젤리", note:"제일 쫀득— 잘 안 눌리고 쭉 늘어나요",
+      k:0.245,coup:0.125,damp:0.680,indent:0.19,lag:0.15,
+      stretchMax:2.10,stretchK:0.18,stretchBack:0.016,stretchD:0.78,twistK:0.11,twistD:0.76,twistRelax:0.96,pitch:0.85
+    },
+    lemon:{
+      body:"#FFE29E",top:"#FFEEC4",deep:"#E8B94F",cheek:"rgba(255,140,160,.32)",
+      label:"레몬푸딩", note:"푸딩처럼 푹 들어가요",
+      k:0.105,coup:0.140,damp:0.845,indent:0.34,lag:0.20,
+      stretchMax:1.60,stretchK:0.19,stretchBack:0.032,stretchD:0.85,twistK:0.13,twistD:0.83,twistRelax:0.86,pitch:0.92
+    }
+  };
+  let flavor = FLAVORS.strawberry;
+  const FACE = "#5C4742";
+
+  /* ═══════════ sound: 전부 Web Audio로 합성 ═══════════
+     물방울 소리의 정체 = 사인파의 "위로 휘어 오르는" 피치 + 아주 짧은 감쇠 + 물속 울림.
+     모든 효과음을 이 drip() 하나에서 파생시켜 소리의 결을 통일한다. */
+  let actx=null, master=null, wetIn=null, noiseBuf=null, rubGain=null, rubFilter=null;
+  let soundOn = true;
+
+  function initAudio(){
+    if(actx || !soundOn) return;
+    try{
+      actx = new (window.AudioContext||window.webkitAudioContext)();
+      master = actx.createGain(); master.gain.value = 0.9;
+      master.connect(actx.destination);
+
+      // 물속 울림(짧은 리버브) — 잔향이 있어야 "물방울"로 들린다
+      const len = Math.floor(actx.sampleRate*0.42);
+      const ir = actx.createBuffer(2, len, actx.sampleRate);
+      for(let ch=0; ch<2; ch++){
+        const d = ir.getChannelData(ch);
+        for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len, 3.2);
+      }
+      const conv = actx.createConvolver(); conv.buffer = ir;
+      const damp = actx.createBiquadFilter();
+      damp.type="lowpass"; damp.frequency.value=2600;      // 잔향의 고음을 깎아 축축하게
+      const wetGain = actx.createGain(); wetGain.gain.value = 0.34;
+      wetIn = actx.createGain(); wetIn.gain.value = 1;
+      wetIn.connect(conv); conv.connect(damp); damp.connect(wetGain); wetGain.connect(master);
+
+      // noise buffer (재사용)
+      noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+
+      // 문지를 때 나는 젖은 마찰음 체인 (게인 0으로 대기)
+      const rubSrc = actx.createBufferSource();
+      rubSrc.buffer = noiseBuf; rubSrc.loop = true;
+      rubFilter = actx.createBiquadFilter();
+      rubFilter.type="bandpass"; rubFilter.frequency.value=520; rubFilter.Q.value=3.2;
+      rubGain = actx.createGain(); rubGain.gain.value = 0;
+      rubSrc.connect(rubFilter); rubFilter.connect(rubGain);
+      rubGain.connect(master); rubGain.connect(wetIn);
+      rubSrc.start();
+    }catch(e){ actx=null; }
+  }
+  function resumeAudio(){ if(actx && actx.state==="suspended") actx.resume(); }
+
+  /* 물방울 한 방울.
+     f0 → f1 로 피치가 위로 휘어 오르는 게 핵심(내려가면 물방울로 안 들린다).
+     wobble: 쫀득하게 떨리는 정도(Hz 편차) */
+  function drip(f0, f1, dur, gain, wobble, delay){
+    if(!actx || !soundOn) return;
+    const t = actx.currentTime + (delay||0);
+    const o = actx.createOscillator(); o.type="sine";
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f1, t+dur*0.75);
+
+    if(wobble){                                    // 쫀득한 젤리 떨림
+      const lfo=actx.createOscillator(); lfo.type="sine";
+      lfo.frequency.setValueAtTime(15, t);
+      lfo.frequency.exponentialRampToValueAtTime(5.5, t+dur);
+      const lg=actx.createGain();
+      lg.gain.setValueAtTime(wobble, t);
+      lg.gain.exponentialRampToValueAtTime(0.5, t+dur);
+      lfo.connect(lg); lg.connect(o.frequency);
+      lfo.start(t); lfo.stop(t+dur+0.05);
+    }
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t+0.010);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g); g.connect(master); if(wetIn) g.connect(wetIn);
+    o.start(t); o.stop(t+dur+0.05);
+  }
+
+  /* 수면을 톡 치는 아주 짧은 전이음 — 방울에 현실감을 더한다 */
+  function plip(freq, gain){
+    if(!actx || !soundOn) return;
+    const t=actx.currentTime;
+    const src=actx.createBufferSource(); src.buffer=noiseBuf;
+    src.playbackRate.value=0.9+Math.random()*0.4;
+    const bp=actx.createBiquadFilter();
+    bp.type="bandpass"; bp.frequency.value=freq; bp.Q.value=6;
+    const g=actx.createGain();
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain, t+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.045);
+    src.connect(bp); bp.connect(g); g.connect(master); if(wetIn) g.connect(wetIn);
+    src.start(t); src.stop(t+0.06);
+  }
+
+  // 맛마다 음높이가 다르다 — 쫀득한 포도는 낮고 묵직하게, 탱탱한 멜론은 높고 맑게
+  const pitch = () => (flavor && flavor.pitch) || 1;
+
+  // 꾹 눌렀을 때: 톡 — 깊이 누를수록 큰 방울이라 낮게 울린다
+  function playSquish(depth){
+    if(!actx || !soundOn) return;
+    const dp=Math.min(1,depth), q=pitch();
+    const f0=(560-200*dp)*q*(0.94+Math.random()*0.12);
+    plip((2200+Math.random()*600)*q, 0.035);
+    drip(f0, f0*2.35, 0.15+0.05*dp, 0.10+0.09*dp, 0, 0);
+  }
+
+  // 놓았을 때: 뽀오옹— 낮고 쫀득하게 떨리는 큰 방울
+  function playBoing(strength){
+    if(!actx || !soundOn) return;
+    const s=Math.min(1,strength), q=pitch();
+    const f0=(150+40*Math.random())*(1-0.15*s)*q;
+    drip(f0, f0*2.6, 0.30+0.22*s, 0.09+0.11*s, 14+16*s, 0);
+    drip(f0*2, f0*4.6, 0.16, 0.030+0.02*s, 8, 0.012);   // 한 옥타브 위 잔방울
+  }
+
+  // 두 손가락으로 쭉 늘일 때: 길게 차오르는 물소리
+  function playStretch(){
+    if(!actx || !soundOn) return;
+    const q=pitch(), f0=210*q;
+    drip(f0, f0*3.1, 0.42, 0.075, 6, 0);
+    plip(1500*q, 0.02);
+  }
+
+  // 맛 바꿀 때: 뽁! 작고 맑은 방울
+  function playPop(){
+    if(!actx || !soundOn) return;
+    const q=pitch();
+    plip(3000*q, 0.03);
+    drip(680*q, 1750*q, 0.13, 0.12, 0, 0);
+  }
+
+  soundBtn.addEventListener("click",()=>{
+    soundOn = !soundOn;
+    soundBtn.setAttribute("aria-pressed", String(soundOn));
+    soundBtn.textContent = soundOn ? "🔊" : "🔇";
+    soundBtn.setAttribute("aria-label", soundOn ? "소리 켜짐 / 끄기" : "소리 꺼짐 / 켜기");
+    if(soundOn){ initAudio(); resumeAudio(); playPop(); }
+    else if(rubGain) rubGain.gain.value=0;
+  });
+
+  const buzz = ms => { if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} };
+
+  /* ═══════════ layout / dpr ═══════════ */
+  let W=560, H=470, CX, CY, R;
+  function resize(){
+    const w = canvas.clientWidth || 560;
+    const h = Math.round(w * 470/560);
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    canvas.style.height = h+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    W=w; H=h; CX=W/2; CY=H*0.47; R=Math.min(W,H)*0.30;
+    for(const p of pts) p.rest = R;
+  }
+
+  /* ═══════════ soft-body physics ═══════════
+     손가락이 "목표 형태"를 만들고, 표면이 스프링으로 그 형태를 따라간다.
+     - 쫀득함: 깊이 누를수록 덜 들어가는 포화 곡선(밀도가 버티는 느낌)
+     - 부피 보존: 파인 만큼의 부피가 나머지 둘레로 밀려나 볼록해짐
+     - 무게중심: 누르는 방향 반대로 살짝 밀렸다가 출렁이며 복귀
+     - 멀티터치: 손가락마다 독립적인 자국이 겹쳐짐 */
+  const N=32, pts=[];
+  for(let i=0;i<N;i++) pts.push({ang:(i/N)*Math.PI*2, r:150, v:0, rest:150});
+
+  const off = new Float32Array(N);    // 이번 프레임의 목표 함몰량
+  const touches = new Map();          // pointerId → {x,y,px,py,lx,ly,speed,pressure}
+  const hover = {x:0,y:0,in:false};   // 마우스 호버(눈동자 추적용)
+  let com = {x:0,y:0,vx:0,vy:0};      // 무게중심 오프셋
+  let count=0, t=0, wasPressed=false, pressDepth=0, lastDepth=0;
+
+  // 두 손가락 제스처 상태 — 늘어남(stretch)과 비틀림(twist)
+  let stretch=1, stretchV=0, stretchTarget=1, stretchAng=0;
+  let twist=0, twistV=0, twistTarget=0;
+  let gesture=null, stretchPeak=1, stretchSounded=false;
+
+  /* 화면 좌표 → 말랑이 몸통 기준 좌표.
+     몸이 늘어나고 돌아간 상태에서도 손가락이 닿은 "그 자리"가 눌리도록 역변환한다. */
+  function toLocal(x,y){
+    let dx=x-(CX+com.x), dy=y-(CY+com.y);
+    if(Math.abs(stretch-1)>0.001){                 // 늘어남 되돌리기(월드 축 기준)
+      const sy=1/Math.pow(stretch,0.75);
+      const ca=Math.cos(-stretchAng), sa=Math.sin(-stretchAng);
+      let rx=dx*ca-dy*sa, ry=dx*sa+dy*ca;
+      rx/=stretch; ry/=sy;
+      const cb=Math.cos(stretchAng), sb=Math.sin(stretchAng);
+      dx=rx*cb-ry*sb; dy=rx*sb+ry*cb;
+    }
+    if(twist){                                     // 비틀림 되돌리기
+      const c=Math.cos(-twist), s=Math.sin(-twist);
+      const nx=dx*c-dy*s, ny=dx*s+dy*c;
+      dx=nx; dy=ny;
+    }
+    return {x:dx, y:dy};
+  }
+
+  function physics(){
+    const fl = flavor;                              // 이 말랑이의 재질
+    t+=0.03;
+    const breath = reduceMotion ? 0 : Math.sin(t)*R*0.010;
+    const pressed = touches.size>0;
+
+    // 1) 손가락이 만드는 목표 형태
+    off.fill(0);
+    for(const tp of touches.values()){
+      // 자국이 손가락을 한 박자 늦게 따라온다 — 점성이 있는 쫀득한 재질의 특징
+      tp.lx += (tp.x-tp.lx)*fl.lag;
+      tp.ly += (tp.y-tp.ly)*fl.lag;
+      const lp = toLocal(tp.lx, tp.ly);
+      const dist=Math.hypot(lp.x,lp.y)||0.001;
+      const dirAng=Math.atan2(lp.y,lp.x);
+      const push=Math.max(0, R-dist);                       // 표면보다 얼마나 안쪽인지
+      // 쫀득: 세게 밀어넣어도 함몰이 포화된다
+      const indent = R*fl.indent*(1-Math.exp(-push/(R*0.34)))*(0.6+0.4*(tp.pressure||0.6));
+      for(let i=0;i<N;i++){
+        const c=Math.cos(pts[i].ang-dirAng);
+        if(c>0) off[i] += indent*Math.pow(c,2.4);           // 손끝 주변만 국소적으로
+      }
+      // 몸통이 손가락 반대쪽으로 살짝 밀림
+      com.vx -= (lp.x/dist)*R*0.0040; com.vy -= (lp.y/dist)*R*0.0040;
+      tp.speed = Math.hypot(tp.x-tp.px, tp.y-tp.py);
+      tp.px=tp.x; tp.py=tp.y;
+    }
+    // 부피 보존: 파인 부피의 평균만큼 전체를 부풀려 되돌려준다
+    let mean=0;
+    for(let i=0;i<N;i++) mean+=off[i];
+    mean/=N;
+
+    /* 1-b) 두 손가락: 벌리면 늘어나고, 돌리면 몸통이 비틀린다 */
+    const tl = [...touches.values()];
+    if(tl.length>=2){
+      const a=tl[0], b=tl[1];
+      const span=Math.hypot(b.x-a.x, b.y-a.y);
+      const ang=Math.atan2(b.y-a.y, b.x-a.x);
+      if(!gesture){ gesture={ref:Math.max(span,R*0.5), prev:ang}; stretchPeak=1; stretchSounded=false; }
+      let d=ang-gesture.prev;                        // 각도 되감기(±π 넘어갈 때)
+      while(d> Math.PI) d-=Math.PI*2;
+      while(d<-Math.PI) d+=Math.PI*2;
+      gesture.prev=ang;
+      twistTarget += d;
+      const tmax=2.0;                                // 무한정 돌지 않고 비틀림에 한계
+      twistTarget=Math.max(-tmax, Math.min(tmax, twistTarget));
+      stretchTarget=Math.max(0.82, Math.min(fl.stretchMax, span/gesture.ref));
+      stretchAng=ang;
+      stretchPeak=Math.max(stretchPeak, stretchTarget);
+      if(!stretchSounded && stretchTarget>1.30){ stretchSounded=true; playStretch(); }
+    }else{
+      if(gesture && stretchPeak>1.22) playBoing(Math.min(1,(stretchPeak-1)*1.5));  // 놓으면 탱—
+      gesture=null;
+      stretchTarget=1;
+      twistTarget*=fl.twistRelax;                    // 비틀림이 스르르 풀린다
+    }
+    // 당길 땐 손가락을 따라오지만, 놓으면 맛마다 다른 속도로 회복한다
+    // (쫀득한 포도는 엿처럼 천천히, 탱탱한 멜론은 통통 튀며 빠르게)
+    const kS = gesture ? fl.stretchK : fl.stretchBack;
+    stretchV += (stretchTarget-stretch)*kS; stretchV*=fl.stretchD; stretch+=stretchV;
+    twistV   += (twistTarget-twist)*fl.twistK;       twistV  *=fl.twistD;   twist  +=twistV;
+    if(stretch<0.7) stretch=0.7;
+    if(stretch>fl.stretchMax*1.12) stretch=fl.stretchMax*1.12;
+
+    // 2) 목표를 향한 스프링 + 이웃 커플링(출렁이는 파동)
+    for(let i=0;i<N;i++){
+      const p=pts[i];
+      const prev=pts[(i+N-1)%N], next=pts[(i+1)%N];
+      const target = p.rest + breath - off[i] + mean;
+      let a = fl.k*(target-p.r);
+      a += fl.coup*(((prev.r+next.r)/2)-p.r);
+      p.v = (p.v+a)*fl.damp;
+    }
+
+    // 무게중심 스프링 복귀 (놓으면 출렁—)
+    com.vx += -0.062*com.x; com.vy += -0.062*com.y;
+    com.vx*=0.89; com.vy*=0.89;
+    com.x+=com.vx; com.y+=com.vy;
+    const lim=R*0.10, cl=Math.hypot(com.x,com.y);
+    if(cl>lim){ com.x*=lim/cl; com.y*=lim/cl; }
+
+    let realDent=0;
+    for(const p of pts){
+      p.r+=p.v;
+      if(p.r<R*0.62)p.r=R*0.62;
+      if(p.r>R*1.30)p.r=R*1.30;
+      const d=p.rest-p.r; if(d>realDent) realDent=d;
+    }
+    /* 표정은 "목표 함몰"이 아니라 "지금 실제로 파인 깊이"를 따라간다.
+       목표값을 쓰면 손이 닿는 순간 최종 표정으로 튀어서 중간 단계가 사라진다.
+       맛별 최대 함몰로 나눠, 어떤 말랑이든 같은 세기로 누르면 같은 표정이 나오게 맞춘다 */
+    pressDepth = Math.min(1, Math.max(0, realDent)/(R*fl.indent));
+
+    // 4) 문지르는 소리: 손가락 이동 속도 → 젖은 마찰음의 세기와 밝기
+    if(rubGain && actx){
+      let sp=0; for(const tp of touches.values()) sp+=tp.speed||0;
+      const target = pressed ? Math.min(0.055, sp*0.0035) : 0;
+      rubGain.gain.setTargetAtTime(target, actx.currentTime, 0.07);
+      if(rubFilter) rubFilter.frequency.setTargetAtTime(430+Math.min(900,sp*55), actx.currentTime, 0.09);
+    }
+
+    // 5) 놓는 순간: 눌려 있던 깊이(=버티고 있던 힘)에 비례한 보잉 + 햅틱
+    //    오래 붙잡고 있으면 속도는 0에 수렴하므로, 속도가 아니라 함몰 깊이를 기준으로 삼는다
+    if(wasPressed && !pressed){
+      playBoing(Math.max(0.25, lastDepth));
+      buzz(8+Math.round(lastDepth*14));
+    }
+    wasPressed=pressed;
+    lastDepth=pressDepth;
+  }
+
+  /* 표정은 몸보다 반 박자 늦게 따라온다.
+     즉시 반영하면 평온 → 찡긋으로 두어 프레임 만에 튀어서 중간의 놀란 얼굴이 보이지 않는다 */
+  let faceDepth=0;
+  function squishAmount(){
+    faceDepth += (pressDepth-faceDepth)*0.14;
+    return faceDepth*1.35;
+  }
+
+  /* ═══════════ draw ═══════════ */
+  // 몸통 기준(로컬) 좌표 — 늘어남·비틀림은 캔버스 변환으로 한 번에 입힌다
+  function pt(i){
+    const p=pts[i%N];
+    return{x:Math.cos(p.ang)*p.r, y:Math.sin(p.ang)*p.r*0.92};
+  }
+
+  // 눈 깜빡임 타이머(가만히 두면 이따금 깜빡)
+  let blinkIn=90, blinkFor=0;
+  function tickBlink(){
+    if(blinkFor>0){ blinkFor--; return; }
+    if(--blinkIn<=0){ blinkFor=7; blinkIn=120+Math.floor(Math.random()*180); }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    tickBlink();
+    const sq=Math.min(1,squishAmount());
+    const sx=stretch, sy=1/Math.pow(stretch,0.75);
+
+    // 그림자 — 늘어난 방향이 가로면 넓게 퍼진다
+    const spread=1+(sx-1)*Math.abs(Math.cos(stretchAng))*0.8;
+    ctx.beginPath();
+    ctx.ellipse(CX+com.x*0.4, CY+R*1.02, R*(0.72+0.10*sq)*spread, R*0.13, 0, 0, Math.PI*2);
+    ctx.fillStyle="rgba(120,80,90,.12)";
+    ctx.fill();
+
+    ctx.save();
+    /* 몸통 변형: 손가락이 만든 축으로 늘리고(월드 기준), 그 안에서 몸이 비틀린다 */
+    ctx.translate(CX+com.x, CY+com.y);
+    if(Math.abs(sx-1)>0.001){
+      ctx.rotate(stretchAng); ctx.scale(sx, sy); ctx.rotate(-stretchAng);
+    }
+    if(twist) ctx.rotate(twist);
+
+    // blob
+    ctx.beginPath();
+    const m0={x:(pt(0).x+pt(1).x)/2,y:(pt(0).y+pt(1).y)/2};
+    ctx.moveTo(m0.x,m0.y);
+    for(let i=1;i<=N;i++){
+      const a=pt(i), b=pt(i+1);
+      ctx.quadraticCurveTo(a.x,a.y,(a.x+b.x)/2,(a.y+b.y)/2);
+    }
+    ctx.closePath();
+    const g=ctx.createRadialGradient(-R*0.3,-R*0.5,R*0.1,0,0,R*1.25);
+    g.addColorStop(0,flavor.top); g.addColorStop(1,flavor.body);
+    ctx.fillStyle=g; ctx.fill();
+
+    // shine
+    ctx.beginPath();
+    ctx.ellipse(-R*0.38,-R*0.42,R*0.16,R*0.09,-0.5,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,255,255,.55)"; ctx.fill();
+
+    // 얼굴은 몸을 따라 돌되, 늘어남은 절반만 받아 알아볼 수 있게
+    ctx.save();
+    ctx.rotate(stretchAng);
+    ctx.scale(Math.pow(1/sx,0.55), Math.pow(1/sy,0.55));
+    ctx.rotate(-stretchAng);
+    drawFace(sq);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  /* ── 표정 ──
+     평온 → (살짝 눌림) 놀람 → (꾹 눌림) 찡긋 → 늘어남 → 어질어질
+     상태가 바뀌는 지점을 눈·입 모양으로 분명히 보여준다 */
+  function drawFace(sq){
+    const dizzy = Math.abs(twist)>0.95;              // 많이 돌리면 눈이 뱅글뱅글
+    const stretched = stretch>1.28;                  // 쭉 늘어나면 눈이 가늘어짐
+    const ex=R*0.30*(1+0.15*sq), ey=-R*0.08, er=R*0.055;
+    ctx.fillStyle=FACE; ctx.strokeStyle=FACE;
+    ctx.lineWidth=Math.max(2.5,R*0.035); ctx.lineCap="round"; ctx.lineJoin="round";
+
+    // 눈동자는 손가락/커서를 따라다닌다
+    let lx=0, ly=0, look=null;
+    if(touches.size>0) look=touches.values().next().value;
+    else if(hover.in) look=hover;
+    if(look){
+      const l=toLocal(look.x, look.y);
+      const d=Math.hypot(l.x,l.y)||1;
+      lx=(l.x/d)*er*0.5; ly=(l.y/d)*er*0.5;
+    }
+
+    if(dizzy){
+      for(const s of [-1,1]){                        // 소용돌이 눈 @ @
+        ctx.beginPath();
+        for(let k=0;k<=26;k++){
+          const th=k/26*Math.PI*3.1, rr=er*1.35*(1-k/30);
+          const x=s*ex+Math.cos(th+twist*2)*rr, y=ey+Math.sin(th+twist*2)*rr;
+          k?ctx.lineTo(x,y):ctx.moveTo(x,y);
+        }
+        ctx.lineWidth=Math.max(2,R*0.022); ctx.stroke();
+      }
+      ctx.lineWidth=Math.max(2.5,R*0.030);
+      ctx.beginPath();                               // 어질어질한 물결 입
+      for(let k=0;k<=16;k++){
+        const x=-R*0.11+ (R*0.22)*k/16, y=R*0.13+Math.sin(k/16*Math.PI*3)*R*0.022;
+        k?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+    }else if(stretched){
+      for(const s of [-1,1]){                        // 가늘게 눌린 눈 — —
+        ctx.beginPath();
+        ctx.ellipse(s*ex, ey, er*0.95, er*0.30, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.beginPath();                               // 놀란 작은 입
+      ctx.ellipse(0, R*0.14, R*0.05, R*0.075, 0, 0, Math.PI*2);
+      ctx.fill();
+    }else if(sq>0.55){
+      for(const s of [-1,1]){                        // 찡긋 > <
+        ctx.beginPath();
+        ctx.arc(s*ex, ey+er*0.5, er*1.25, Math.PI*1.15, Math.PI*1.85);
+        ctx.stroke();
+      }
+      ctx.beginPath();                               // 크게 벌린 입
+      ctx.ellipse(0, R*0.17, R*0.095, R*(0.07+0.055*sq), 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle="rgba(255,140,160,.85)";         // 혀
+      ctx.beginPath();
+      ctx.ellipse(0, R*0.21+R*0.03*sq, R*0.05, R*0.03, 0, 0, Math.PI*2);
+      ctx.fill(); ctx.fillStyle=FACE;
+    }else if(sq>0.22){
+      for(const s of [-1,1]){                        // 놀란 동그란 눈
+        ctx.beginPath();
+        ctx.ellipse(s*ex+lx*0.6, ey+ly*0.6, er*1.18, er*1.42, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.beginPath();                               // 오— 하는 입
+      ctx.ellipse(0, R*0.14, R*0.055, R*0.07, 0, 0, Math.PI*2);
+      ctx.fill();
+    }else{
+      const blinking = blinkFor>0;
+      for(const s of [-1,1]){
+        ctx.beginPath();
+        if(blinking) ctx.ellipse(s*ex, ey, er*0.95, er*0.16, 0, 0, Math.PI*2);
+        else ctx.ellipse(s*ex+lx, ey+ly, er, er*1.25, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.beginPath();                               // 살짝 미소
+      ctx.arc(0, R*0.10, R*0.07, Math.PI*0.15, Math.PI*0.85);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle=flavor.cheek;
+    for(const s of [-1,1]){
+      ctx.beginPath();
+      ctx.ellipse(s*R*0.52, R*0.06, R*(0.10+0.03*sq), R*0.055, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function loop(){ physics(); draw(); requestAnimationFrame(loop); }
+
+  /* ═══════════ input (멀티터치) ═══════════ */
+  function localXY(e){
+    const r=canvas.getBoundingClientRect();
+    return {x:e.clientX-r.left, y:e.clientY-r.top};
+  }
+  canvas.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    // 캡처가 거부돼도(브라우저별 차이) 누르는 동작 자체는 계속돼야 한다
+    try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+    const p=localXY(e);
+    touches.set(e.pointerId,{x:p.x,y:p.y,px:p.x,py:p.y,lx:p.x,ly:p.y,speed:0,pressure:e.pressure||0.6});
+    canvas.classList.add("pressing");
+    countEl.textContent=String(++count);
+    initAudio(); resumeAudio();
+    const l=toLocal(p.x,p.y);
+    playSquish(Math.max(0.2, 1-Math.hypot(l.x,l.y)/(R*1.3)));
+    buzz(8);
+  });
+  canvas.addEventListener("pointermove",e=>{
+    const p=localXY(e);
+    const tp=touches.get(e.pointerId);
+    if(tp){ tp.x=p.x; tp.y=p.y; tp.pressure=e.pressure||tp.pressure; }
+    if(e.pointerType==="mouse"){ hover.x=p.x; hover.y=p.y; hover.in=true; }
+  });
+  function release(e){
+    touches.delete(e.pointerId);
+    if(touches.size===0) canvas.classList.remove("pressing");
+  }
+  canvas.addEventListener("pointerup",release);
+  canvas.addEventListener("pointercancel",release);
+  canvas.addEventListener("pointerleave",e=>{
+    if(e.pointerType==="mouse") hover.in=false;
+  });
+
+  /* ═══════════ flavors ═══════════ */
+  const noteEl = document.getElementById("flavorNote");
+  function showNote(){
+    noteEl.innerHTML = `<b>${flavor.label}</b> · ${flavor.note}`;
+  }
+  document.querySelectorAll(".chip").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));
+      btn.setAttribute("aria-pressed","true");
+      flavor=FLAVORS[btn.dataset.flavor];
+      showNote();
+      initAudio(); resumeAudio(); playPop();
+      if(!reduceMotion) for(const p of pts) p.v += (Math.random()-0.5)*R*0.06;
+    });
+  });
+  showNote();
+
+  new ResizeObserver(resize).observe(canvas);
+  resize();
+  loop();
+})();
+</script>
