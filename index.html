@@ -424,7 +424,7 @@
     strawberry:{
       body:"#FFB3C7",top:"#FFCFDD",deep:"#F2708F",cheek:"rgba(242,112,143,.35)",
       label:"딸기우유", material:"저반발 모찌", note:"천천히 눌리고 자국이 잠깐 남아요",
-      indent:0.42, lobe:2.20, bulge:0.35, memory:0.70, memDecay:0.978, sticky:0.20,
+      indent:0.52, lobe:2.05, bulge:0.62, memory:0.70, memDecay:0.978, sticky:0.20,
       comPush:0.0030, comK:0.070, comD:0.890,
       k:0.085,coup:0.190,damp:0.900,lag:0.30,
       stretchMax:1.60,stretchK:0.22,stretchBack:0.070,stretchD:0.87,twistK:0.18,twistD:0.80,twistRelax:0.90,
@@ -433,7 +433,7 @@
     melon:{
       body:"#B8E6C8",top:"#D4F2DF",deep:"#6FC492",cheek:"rgba(255,140,160,.30)",
       label:"멜론소다", material:"전분 스트레스볼", note:"잘 안 들어가고 손가락 사이로 불룩",
-      indent:0.31, lobe:1.15, bulge:0.95, memory:0.25, memDecay:0.930, sticky:0.10,
+      indent:0.36, lobe:1.10, bulge:0.95, memory:0.25, memDecay:0.930, sticky:0.10,
       comPush:0.0022, comK:0.085, comD:0.860,
       k:0.175,coup:0.150,damp:0.845,lag:0.42,
       stretchMax:1.40,stretchK:0.30,stretchBack:0.200,stretchD:0.88,twistK:0.26,twistD:0.86,twistRelax:0.82,
@@ -442,7 +442,7 @@
     sky:{
       body:"#AEDCF0",top:"#CFEBF8",deep:"#6FB3D8",cheek:"rgba(255,140,160,.30)",
       label:"하늘소다", material:"워터볼", note:"누르면 몸 전체가 찰랑 흔들려요",
-      indent:0.30, lobe:1.50, bulge:0.55, memory:0.02, memDecay:0.870, sticky:0.05,
+      indent:0.42, lobe:1.45, bulge:0.72, memory:0.02, memDecay:0.870, sticky:0.05,
       comPush:0.0135, comK:0.030, comD:0.945,
       k:0.105,coup:0.265,damp:0.918,lag:0.50,
       stretchMax:1.70,stretchK:0.20,stretchBack:0.090,stretchD:0.90,twistK:0.14,twistD:0.88,twistRelax:0.88,
@@ -451,7 +451,7 @@
     grape:{
       body:"#CDB8F0",top:"#E0D3F7",deep:"#9C7FD4",cheek:"rgba(255,140,160,.30)",
       label:"포도젤리", material:"끈적 슬라임", note:"뗄 때 쩍— 하고 딸려 올라와요",
-      indent:0.33, lobe:2.70, bulge:0.30, memory:0.50, memDecay:0.968, sticky:1.00,
+      indent:0.44, lobe:2.45, bulge:0.60, memory:0.50, memDecay:0.968, sticky:1.00,
       comPush:0.0040, comK:0.060, comD:0.880,
       k:0.130,coup:0.170,damp:0.845,lag:0.15,
       stretchMax:1.75,stretchK:0.18,stretchBack:0.016,stretchD:0.78,twistK:0.11,twistD:0.76,twistRelax:0.96,
@@ -460,7 +460,7 @@
     lemon:{
       body:"#FFE29E",top:"#FFEEC4",deep:"#E8B94F",cheek:"rgba(255,140,160,.32)",
       label:"레몬푸딩", material:"푸딩", note:"푹 꺼졌다가 탱— 하고 떨려요",
-      indent:0.52, lobe:1.85, bulge:0.45, memory:0.35, memDecay:0.955, sticky:0.25,
+      indent:0.60, lobe:1.75, bulge:0.55, memory:0.35, memDecay:0.955, sticky:0.25,
       comPush:0.0055, comK:0.055, comD:0.905,
       k:0.075,coup:0.235,damp:0.905,lag:0.22,
       stretchMax:1.55,stretchK:0.19,stretchBack:0.032,stretchD:0.85,twistK:0.13,twistD:0.83,twistRelax:0.86,
@@ -704,13 +704,61 @@
     for(let i=0;i<7;i++) setTimeout(()=>grain(0.5*amount), 30+i*28+Math.random()*20);
   }
 
+  /* 떡 치대는 질퍽한 소리 — 젖은 반죽이 눌려 퍼지는 그 "철퍽".
+     묵직한 저역 덩어리 + 물기 머금은 중역 + 살에서 떨어지는 끈적한 꼬리, 셋을 겹친다 */
+  function squelch(depth, wetness){
+    if(!actx || !soundOn) return;
+    const t=actx.currentTime, d=Math.min(1,depth), q=pitch();
+    const w=0.35+0.65*(wetness===undefined?1:wetness);
+
+    // ① 반죽 덩어리가 바닥에 닿는 묵직한 저역
+    const o=actx.createOscillator(); o.type="sine";
+    o.frequency.setValueAtTime((105+25*Math.random())*q, t);
+    o.frequency.exponentialRampToValueAtTime((52+10*Math.random())*q, t+0.16);
+    const og=actx.createGain();
+    og.gain.setValueAtTime(0.0001,t);
+    og.gain.exponentialRampToValueAtTime(0.055+0.075*d, t+0.012);
+    og.gain.exponentialRampToValueAtTime(0.0001, t+0.20);
+    o.connect(og); og.connect(master);
+    o.start(t); o.stop(t+0.24);
+
+    // ② 물기 머금은 중역 — 질퍽함의 정체
+    const src=actx.createBufferSource(); src.buffer=noiseBuf; src.loop=true;
+    src.playbackRate.value=0.45+Math.random()*0.25;
+    const lp=actx.createBiquadFilter(); lp.type="lowpass"; lp.Q.value=7;
+    lp.frequency.setValueAtTime((900+400*Math.random())*q, t);
+    lp.frequency.exponentialRampToValueAtTime(240*q, t+0.17);   // 눌리며 둔해짐
+    const g=actx.createGain();
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime((0.035+0.055*d)*w, t+0.016);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.19+0.10*d);
+    src.connect(lp); lp.connect(g); g.connect(master); if(wetIn) g.connect(wetIn);
+    src.start(t); src.stop(t+0.34);
+
+    // ③ 손에서 떨어질 때 살짝 빨리는 끈적한 꼬리
+    if(w>0.6){
+      const s2=actx.createBufferSource(); s2.buffer=noiseBuf; s2.loop=true;
+      s2.playbackRate.value=0.7;
+      const bp=actx.createBiquadFilter(); bp.type="bandpass"; bp.Q.value=6;
+      bp.frequency.setValueAtTime(520*q, t+0.05);
+      bp.frequency.exponentialRampToValueAtTime(1250*q, t+0.26);
+      const g2=actx.createGain();
+      g2.gain.setValueAtTime(0.0001, t+0.05);
+      g2.gain.exponentialRampToValueAtTime(0.016*w*(0.4+d), t+0.10);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t+0.30);
+      s2.connect(bp); bp.connect(g2); g2.connect(master); if(wetIn) g2.connect(wetIn);
+      s2.start(t); s2.stop(t+0.34);
+    }
+  }
+
   // 꾹 눌렀을 때 — 재질 비율대로 성분을 섞는다
   function playSquish(depth){
     if(!actx || !soundOn) return;
     const dp=Math.min(1,depth), q=pitch(), f=flavor;
     const f0=(560-200*dp)*q*(0.94+Math.random()*0.12);
-    plip((2200+Math.random()*600)*q, 0.030*(0.4+f.sndWet));
-    drip(f0, f0*2.35, 0.15+0.05*dp, (0.05+0.07*dp)*(0.35+f.sndWet), 0, 0);
+    squelch(dp, f.sndWet);                  // 떡 치대는 질퍽함이 기본 바탕
+    plip((2200+Math.random()*600)*q, 0.024*(0.4+f.sndWet));
+    drip(f0, f0*2.35, 0.15+0.05*dp, (0.035+0.05*dp)*(0.35+f.sndWet), 0, 0);
     if(f.sndWet>0.4)  squeakBurst(dp*f.sndWet);
     if(f.sndAir>0.3)  airPuff(dp*f.sndAir, 0.22+0.20*f.sndAir);
     if(f.sndSlosh>0.3) slosh(dp*f.sndSlosh);
@@ -726,6 +774,7 @@
     const s=Math.min(1,strength), f=flavor;
     if(f.sticky>0.5) peel(s);
     else playBoing(s*(0.5+0.5*f.sndWet));
+    squelch(s*0.8, f.sndWet);               // 손에서 떨어질 때의 질퍽
     if(f.sndSlosh>0.3) slosh(s*f.sndSlosh);
     if(f.sndAir>0.5)   airPuff(s*f.sndAir*0.7, 0.30);
     if(f.sndGrain>0.5){
@@ -798,7 +847,7 @@
   const touches = new Map();          // pointerId → {x,y,px,py,lx,ly,speed,pressure}
   const hover = {x:0,y:0,in:false};   // 마우스 호버(눈동자 추적용)
   let com = {x:0,y:0,vx:0,vy:0};      // 무게중심 오프셋
-  let count=0, t=0, wasPressed=false, pressDepth=0, lastDepth=0;
+  let count=0, t=0, wasPressed=false, pressDepth=0, lastDepth=0, lastSquelch=0;
 
   // 두 손가락 제스처 상태 — 늘어남(stretch)과 비틀림(twist)
   let stretch=1, stretchV=0, stretchTarget=1, stretchAng=0;
@@ -927,8 +976,8 @@
     let realDent=0;
     for(const p of pts){
       p.r+=p.v;
-      if(p.r<R*0.45)p.r=R*0.45;
-      if(p.r>R*1.45)p.r=R*1.45;
+      if(p.r<R*0.34)p.r=R*0.34;
+      if(p.r>R*1.70)p.r=R*1.70;
       const d=p.rest-p.r; if(d>realDent) realDent=d;
     }
     /* 표정은 "목표 함몰"이 아니라 "지금 실제로 파인 깊이"를 따라간다.
@@ -952,6 +1001,13 @@
       }
       // 워터볼은 흔들 때마다 안에서 물이 찰랑인다
       if(fl.sndSlosh>0.5 && pressed && sp>7 && Math.random()<0.03) slosh(0.35);
+      /* 누른 채로 문지르면 = 떡을 치대는 동작. 속도에 비례해 질퍽 소리를 얹되
+         너무 자주 겹치지 않도록 최소 간격을 둔다 */
+      if(pressed && sp>3.5 && pressDepth>0.25 && now-lastSquelch>0.18){
+        if(Math.random() < Math.min(0.5, sp*0.03)){
+          lastSquelch=now; squelch(0.35+0.5*pressDepth, fl.sndWet);
+        }
+      }
 
       /* 찌걱은 "눌러서 비빌 때" 난다 — 살살 쓰다듬으면 물소리만, 꾹 누른 채
          문지르면 찌걱거림이 겹친다. 빠를수록 높고 촘촘해진다 */
@@ -1000,6 +1056,14 @@
 
   // 눈 깜빡임 타이머(가만히 두면 이따금 깜빡)
   let blinkIn=90, blinkFor=0;
+  // 꾹 눌렀을 때 나오는 표정 번호 — 누를 때마다 새로 뽑아 매번 다른 얼굴이 나온다
+  const PRESS_FACES=6;
+  let pressFace=0, lastFace=-1;
+  function pickFace(){
+    let f; do { f=Math.floor(Math.random()*PRESS_FACES); }
+    while(PRESS_FACES>1 && f===lastFace);   // 같은 표정이 연달아 나오지 않게
+    lastFace=f; pressFace=f;
+  }
   function tickBlink(){
     if(blinkFor>0){ blinkFor--; return; }
     if(--blinkIn<=0){ blinkFor=7; blinkIn=120+Math.floor(Math.random()*180); }
@@ -1103,18 +1167,73 @@
       ctx.ellipse(0, R*0.14, R*0.05, R*0.075, 0, 0, Math.PI*2);
       ctx.fill();
     }else if(sq>0.55){
-      for(const s of [-1,1]){                        // 찡긋 > <
+      /* 꾹 눌렀을 때의 표정은 누를 때마다 랜덤으로 뽑힌다(pressFace).
+         같은 말랑이를 계속 눌러도 매번 다른 얼굴이 나오게 */
+      const F=pressFace;
+      if(F===0){                                     // 찡긋 > <
+        for(const s of [-1,1]){
+          ctx.beginPath();
+          ctx.arc(s*ex, ey+er*0.5, er*1.25, Math.PI*1.15, Math.PI*1.85);
+          ctx.stroke();
+        }
+      }else if(F===1){                               // 질끈 감은 눈 ^ ^
+        for(const s of [-1,1]){
+          ctx.beginPath();
+          ctx.arc(s*ex, ey+er*1.1, er*1.2, Math.PI*1.18, Math.PI*1.82);
+          ctx.stroke();
+        }
+      }else if(F===2){                               // 한쪽 윙크
         ctx.beginPath();
-        ctx.arc(s*ex, ey+er*0.5, er*1.25, Math.PI*1.15, Math.PI*1.85);
-        ctx.stroke();
+        ctx.ellipse(-ex, ey, er*1.1, er*1.35, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ex, ey+er*0.5, er*1.2, Math.PI*1.15, Math.PI*1.85); ctx.stroke();
+      }else if(F===3){                               // 동그랗게 커진 눈
+        for(const s of [-1,1]){
+          ctx.beginPath();
+          ctx.ellipse(s*ex, ey, er*1.45, er*1.6, 0, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle="#fff";                        // 눈에 반짝임
+        for(const s of [-1,1]){
+          ctx.beginPath();
+          ctx.ellipse(s*ex+er*0.4, ey-er*0.5, er*0.32, er*0.36, 0, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle=FACE;
+      }else if(F===4){                               // 하트 눈
+        for(const s of [-1,1]){
+          ctx.save(); ctx.translate(s*ex, ey); ctx.scale(er*0.075, er*0.075);
+          ctx.beginPath();
+          ctx.moveTo(0,6);
+          ctx.bezierCurveTo(-9,-2,-6,-11,0,-6);
+          ctx.bezierCurveTo(6,-11,9,-2,0,6);
+          ctx.closePath();
+          ctx.fillStyle="#F2708F"; ctx.fill(); ctx.restore();
+        }
+        ctx.fillStyle=FACE;
+      }else{                                         // 옆으로 흘겨보는 눈
+        for(const s of [-1,1]){
+          ctx.beginPath();
+          ctx.ellipse(s*ex, ey, er*1.15, er*0.55, 0, 0, Math.PI*2); ctx.fill();
+        }
       }
-      ctx.beginPath();                               // 크게 벌린 입
-      ctx.ellipse(0, R*0.17, R*0.095, R*(0.07+0.055*sq), 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle="rgba(255,140,160,.85)";         // 혀
-      ctx.beginPath();
-      ctx.ellipse(0, R*0.21+R*0.03*sq, R*0.05, R*0.03, 0, 0, Math.PI*2);
-      ctx.fill(); ctx.fillStyle=FACE;
+      // 입도 표정마다 다르게
+      if(F===4){                                     // 하트눈엔 헤벌쭉 웃는 입
+        ctx.beginPath();
+        ctx.arc(0, R*0.10, R*0.10, Math.PI*0.10, Math.PI*0.90);
+        ctx.lineWidth=Math.max(3,R*0.042); ctx.stroke();
+      }else if(F===5){                               // 흘겨볼 땐 삐죽
+        ctx.beginPath();
+        ctx.ellipse(R*0.045, R*0.15, R*0.045, R*0.032, 0.4, 0, Math.PI*2); ctx.fill();
+      }else{
+        ctx.beginPath();                             // 크게 벌린 입
+        ctx.ellipse(0, R*0.17, R*0.095, R*(0.07+0.055*sq), 0, 0, Math.PI*2);
+        ctx.fill();
+        if(F!==1){
+          ctx.fillStyle="rgba(255,140,160,.85)";     // 혀
+          ctx.beginPath();
+          ctx.ellipse(0, R*0.21+R*0.03*sq, R*0.05, R*0.03, 0, 0, Math.PI*2);
+          ctx.fill(); ctx.fillStyle=FACE;
+        }
+      }
     }else if(sq>0.22){
       for(const s of [-1,1]){                        // 놀란 동그란 눈
         ctx.beginPath();
@@ -1160,6 +1279,7 @@
     touches.set(e.pointerId,{x:p.x,y:p.y,px:p.x,py:p.y,lx:p.x,ly:p.y,speed:0,pressure:e.pressure||0.6});
     canvas.classList.add("pressing");
     countEl.textContent=String(++count);
+    pickFace();                      // 누를 때마다 표정을 새로 뽑는다
     initAudio(); resumeAudio();
     const l=toLocal(p.x,p.y);
     playSquish(Math.max(0.2, 1-Math.hypot(l.x,l.y)/(R*1.3)));
