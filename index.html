@@ -159,6 +159,30 @@
   .card h3{margin:0 0 8px;font-size:18px;font-weight:800}
   .card p{margin:0;font-size:14.5px;color:var(--ink-soft)}
 
+  /* ── 추천 홈페이지 (wsQf 패밀리와 같은 카드 형식) ── */
+  .rec-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:760px){.rec-cards{grid-template-columns:1fr}}
+  .rec-card{
+    display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:26px;
+    padding:26px 24px;box-shadow:var(--shadow);
+    transition:transform .18s,border-color .18s,box-shadow .18s;
+  }
+  .rec-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 14px 32px rgba(242,112,143,.18)}
+  .rec-card__emoji{
+    width:52px;height:52px;display:grid;place-items:center;font-size:25px;margin-bottom:6px;
+    border-radius:42% 58% 52% 48%/55% 45% 55% 45%;
+  }
+  .rec-card:nth-child(1) .rec-card__emoji{background:var(--accent-soft)}
+  .rec-card:nth-child(2) .rec-card__emoji{background:var(--mint-soft)}
+  .rec-card:nth-child(3) .rec-card__emoji{background:var(--surface-2)}
+  .rec-card__name{font-size:18px;font-weight:800;color:var(--ink)}
+  .rec-card__desc{font-size:14.5px;color:var(--ink-soft);line-height:1.6}
+  .rec-card__url{margin-top:auto;padding-top:10px;font-size:13px;font-weight:700;color:var(--accent-deep)}
+  @media (prefers-reduced-motion: reduce){
+    .rec-card,.rec-card:hover{transition:none;transform:none}
+  }
+
   /* ── friends ── */
   .friends{display:flex;flex-wrap:wrap;justify-content:center;gap:34px}
   .friend{display:flex;flex-direction:column;align-items:center;gap:12px;width:120px}
@@ -207,6 +231,7 @@
       <a href="#play">놀이터</a>
       <a href="#why">왜 말랑이?</a>
       <a href="#friends">친구들</a>
+      <a href="#recommend">추천</a>
       <a href="contact.html">문의</a>
     </nav>
   </div>
@@ -303,6 +328,37 @@
       </div>
     </div>
   </section>
+
+  <!-- 추천 홈페이지 -->
+  <section id="recommend">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">추천 홈페이지</span>
+        <h2>말랑이가 좋았다면, 이것도</h2>
+        <p>설치도 가입도 없이 브라우저에서 바로 즐기는 자매 사이트예요.</p>
+      </div>
+      <div class="rec-cards">
+        <a class="rec-card" href="https://yamy.ws-qf.com/" target="_blank" rel="noopener noreferrer">
+          <span class="rec-card__emoji">🍜</span>
+          <span class="rec-card__name">대얌이</span>
+          <span class="rec-card__desc">오늘 뭐 먹지? 고민될 때 돌리는 룰렛. 내 주변 음식점·카페·술집을 대신 골라줘요.</span>
+          <span class="rec-card__url">yamy.ws-qf.com →</span>
+        </a>
+        <a class="rec-card" href="https://mist.ws-qf.com/" target="_blank" rel="noopener noreferrer">
+          <span class="rec-card__emoji">🌧️</span>
+          <span class="rec-card__name">비밀창문</span>
+          <span class="rec-card__desc">빗방울이 맺힌 창문에 손끝으로 편지나 그림을 그려보세요. 김 서린 유리의 그 감촉이에요.</span>
+          <span class="rec-card__url">mist.ws-qf.com →</span>
+        </a>
+        <a class="rec-card" href="https://shutress.ws-qf.com/" target="_blank" rel="noopener noreferrer">
+          <span class="rec-card__emoji">🥊</span>
+          <span class="rec-card__name">서트레스</span>
+          <span class="rec-card__desc">쌓인 스트레스를 시원하게 날려버리는 게임. 말랑이로 안 풀릴 때 여기로 오세요.</span>
+          <span class="rec-card__url">shutress.ws-qf.com →</span>
+        </a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -316,16 +372,18 @@
         <h4>말랑말랑</h4>
         <ul>
           <li><a href="#play">놀이터</a></li>
+          <li><a href="#recommend">추천 홈페이지</a></li>
           <li><a href="contact.html">문의하기</a></li>
-          <li><a href="https://github.com/phjjurno/mallang" target="_blank" rel="noopener noreferrer" class="ext">GitHub 저장소</a></li>
         </ul>
       </div>
       <div>
         <h4>다른 서비스</h4>
         <ul>
           <li><a href="https://ws-qf.com/" target="_blank" rel="noopener noreferrer" class="ext">wsQf-PDF</a></li>
+          <li><a href="https://yamy.ws-qf.com/" target="_blank" rel="noopener noreferrer" class="ext">대얌이</a></li>
+          <li><a href="https://mist.ws-qf.com/" target="_blank" rel="noopener noreferrer" class="ext">비밀창문</a></li>
+          <li><a href="https://shutress.ws-qf.com/" target="_blank" rel="noopener noreferrer" class="ext">서트레스</a></li>
           <li><a href="https://mousekm.ws-qf.com/" target="_blank" rel="noopener noreferrer" class="ext">mousekm</a></li>
-          <li><a href="https://phjjurno.github.io/STUDIO/" target="_blank" rel="noopener noreferrer" class="ext">PULSEORIGN STUDIO</a></li>
         </ul>
       </div>
     </div>
@@ -393,9 +451,22 @@
   function initAudio(){
     if(actx || !soundOn) return;
     try{
+      /* iOS: 벨소리/무음 스위치가 무음이면 Web Audio가 통째로 음소거된다.
+         오디오 세션을 'playback'으로 선언하면 무음 모드에서도 소리가 난다(iOS 16.4+) */
+      try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; }catch(err){}
+
       actx = new (window.AudioContext||window.webkitAudioContext)();
       master = actx.createGain(); master.gain.value = 0.9;
       master.connect(actx.destination);
+
+      /* iOS 잠금 해제: 사용자 제스처 안에서 길이 0짜리 버퍼를 한 번 재생해야
+         이후의 소리가 나온다. 이게 없으면 컨텍스트만 만들어지고 무음이 된다 */
+      try{
+        const s = actx.createBufferSource();
+        s.buffer = actx.createBuffer(1, 1, 22050);
+        s.connect(actx.destination);
+        s.start(0);
+      }catch(err){}
 
       // 물속 울림(짧은 리버브) — 잔향이 있어야 "물방울"로 들린다
       const len = Math.floor(actx.sampleRate*0.42);
@@ -445,7 +516,22 @@
       squeakChop = chop;
     }catch(e){ actx=null; }
   }
-  function resumeAudio(){ if(actx && actx.state==="suspended") actx.resume(); }
+  function resumeAudio(){ if(actx && actx.state!=="running"){ try{ actx.resume(); }catch(err){} } }
+
+  /* 아이폰에서 소리가 안 나던 이유 정리:
+     ① 캔버스 밖(맛 고르기 등)을 먼저 누르면 컨텍스트가 잠긴 채로 만들어졌다
+     ② 홈으로 나갔다 돌아오면 iOS가 컨텍스트를 정지시켜 둔다
+     그래서 첫 터치는 문서 전체에서 받아 열어주고, 돌아올 때마다 다시 깨운다 */
+  (function unlockAudioOnFirstTouch(){
+    const unlock = () => { initAudio(); resumeAudio(); };
+    for(const ev of ["pointerdown","touchend","click"]){
+      document.addEventListener(ev, unlock, {passive:true});
+    }
+    document.addEventListener("visibilitychange", () => {
+      if(!document.hidden) resumeAudio();
+    });
+    window.addEventListener("pageshow", resumeAudio);
+  })();
 
   /* 물방울 한 방울.
      f0 → f1 로 피치가 위로 휘어 오르는 게 핵심(내려가면 물방울로 안 들린다).
